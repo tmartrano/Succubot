@@ -31,11 +31,11 @@ public class PollManager {
         this.userVotesRepository = userVotesRepository;
     }
 
-    public List<PollEntry> generateMoviePoll(MovieCategory movieCategory) {
+    public List<PollEntry> generateMoviePoll(final MovieCategory movieCategory) {
         final List<String> usernames = movieListManager.getDistinctUsernames();
         int pollEntryNumber = 0;
 
-        for (String username : usernames) {
+        for (final String username : usernames) {
             final List<MovieEntry> movieListForUser =
                     movieListManager.getMoviesByUsernameAndCategory(username, movieCategory);
 
@@ -68,13 +68,12 @@ public class PollManager {
     }
 
     public PollEntry closePoll() {
-        //What do we do if there's a tie?
-        final PollEntry winningPoll = pollRepository.getWinningMovie();
+        final PollEntry winningPoll = pollRepository.findTopByOrderByVoteTallyDesc();
 
         pollRepository.deleteAll();
         pollRepository.deleteAll();
 
-        return null;
+        return winningPoll;
     }
 
     //region Helper Methods
@@ -85,7 +84,7 @@ public class PollManager {
         final List<UserVotes> userVotesByUsername =
                 userVotesRepository.findAllUserVotesByUsername(username);
 
-        for (UserVotes userVotes : userVotesByUsername) {
+        for (final UserVotes userVotes : userVotesByUsername) {
             if (movieVotedFor.getEntryId().toString().equalsIgnoreCase(userVotes.getEntryId().toString())) {
                 throw new PollValidationException("User has already voted for this movie");
             }

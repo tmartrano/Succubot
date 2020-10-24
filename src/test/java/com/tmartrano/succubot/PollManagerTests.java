@@ -32,12 +32,6 @@ public class PollManagerTests {
     @Autowired
     private TestHelper testHelper;
 
-    @Autowired
-    private PollRepository pollRepository;
-
-    @Autowired
-    private UserVotesRepository userVotesRepository;
-
     private final String username = "Tealx";
 
     //region generateMoviePoll
@@ -45,7 +39,7 @@ public class PollManagerTests {
     @Transactional
     public void generatePoll_BadMovies_Successful() {
         testHelper.seedMovieRepositoryOneCategory();
-        List<PollEntry> pollEntries=pollManager.generateMoviePoll(MovieCategory.BAD_MOVIE);
+        List<PollEntry> pollEntries = pollManager.generateMoviePoll(MovieCategory.BAD_MOVIE);
 
         assertNotNull(pollEntries);
         assertFalse(pollEntries.isEmpty());
@@ -89,7 +83,7 @@ public class PollManagerTests {
         assertNotNull(pollEntry);
         assertEquals(1, pollEntry.getVoteTally());
 
-        List<UserVotes> userVotes = userVotesRepository.findAllUserVotesByUsername(username);
+        List<UserVotes> userVotes = testHelper.findVotesByUsername(username);
         assertNotNull(userVotes);
         assertEquals(1, userVotes.size());
     }
@@ -105,17 +99,17 @@ public class PollManagerTests {
 
         pollManager.voteForMovie(username, 3);
 
-        List<UserVotes> userVotes = userVotesRepository.findAllUserVotesByUsername(username);
+        List<UserVotes> userVotes = testHelper.findVotesByUsername(username);
         assertNotNull(userVotes);
         assertEquals(3, userVotes.size());
 
-        final PollEntry pollEntry1 = pollRepository.findPollEntryByPollEntryNumber(1);
+        final PollEntry pollEntry1 = testHelper.findPollEntryByNumber(1);
         assertEquals(1, pollEntry1.getVoteTally());
 
-        final PollEntry pollEntry2 = pollRepository.findPollEntryByPollEntryNumber(2);
+        final PollEntry pollEntry2 = testHelper.findPollEntryByNumber(2);
         assertEquals(1, pollEntry2.getVoteTally());
 
-        final PollEntry pollEntry3 = pollRepository.findPollEntryByPollEntryNumber(3);
+        final PollEntry pollEntry3 = testHelper.findPollEntryByNumber(3);
         assertEquals(1, pollEntry3.getVoteTally());
     }
 
@@ -182,7 +176,7 @@ public class PollManagerTests {
         pollManager.voteForMovie("User2", 3);
         pollManager.voteForMovie("User3", 3);
 
-        final PollEntry pollEntry = pollRepository.findPollEntryByPollEntryNumber(3);
+        final PollEntry pollEntry = testHelper.findPollEntryByNumber(3);
         assertNotNull(pollEntry);
         assertEquals(3, pollEntry.getVoteTally());
     }
@@ -190,14 +184,62 @@ public class PollManagerTests {
     //endregion
 
     //region closePoll
+    @Test
+    @Transactional
+    public void closePoll_AndReturnWinningMovie_NoTie() throws Exception {
+        testHelper.seedMovieRepositoryOneCategory();
+        pollManager.generateMoviePoll(MovieCategory.BAD_MOVIE);
+
+        testHelper.voteForMoviesNoTie();
+        final PollEntry expectedWinningEntry = testHelper.findPollEntryByNumber(3);
+
+        final PollEntry actualWinningEntry = pollManager.closePoll();
+
+        //Verify entry is expected
+        assertNotNull(actualWinningEntry);
+        assertEquals(expectedWinningEntry.getPollEntryDescription(), actualWinningEntry.getPollEntryDescription());
+
+        //Validate poll is cleared out
+        List<PollEntry> pollEntries = testHelper.getAllPollEntries();
+        assertTrue(pollEntries.isEmpty());
+
+        //Validate user votes are cleared out
+        List<UserVotes> userVotes = testHelper.getAllUserVotes();
+        assertTrue(pollEntries.isEmpty());
+    }
+
+    @Test
+    @Transactional
+    public void closePoll_TieBetweenWinners() throws Exception {
+        testHelper.seedMovieRepositoryOneCategory();
+        pollManager.generateMoviePoll(MovieCategory.BAD_MOVIE);
+        testHelper.voteForMoviesTie();
+
+        final PollEntry expectedWinningEntry1 = testHelper.findPollEntryByNumber(1);
+        final PollEntry expectedWinningEntry2 = testHelper.findPollEntryByNumber(3);
+
+        final PollEntry actualWinningEntry = pollManager.closePoll();
+
+        //Verify entry is expected
+        assertNotNull(actualWinningEntry);
+        assertTrue((expectedWinningEntry1.getPollEntryDescription().equals(actualWinningEntry.getPollEntryDescription())) ||
+                (expectedWinningEntry2.getPollEntryDescription().equals(actualWinningEntry.getPollEntryDescription())));
+
+        //Validate poll is cleared out
+        List<PollEntry> pollEntries = testHelper.getAllPollEntries();
+        assertTrue(pollEntries.isEmpty());
+
+        //Validate user votes are cleared out
+        List<UserVotes> userVotes = testHelper.getAllUserVotes();
+        assertTrue(pollEntries.isEmpty());
+
+
+    }
 
     //endregion
-
-    //Get Movie poll winner and close poll (delete movie poll also delete user votes)
 
     private static <T> Predicate<T> distinctByKey(Function<? super T, Object> keyExtractor) {
         Map<Object, Boolean> map = new ConcurrentHashMap<>();
         return t -> map.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
-
 }
