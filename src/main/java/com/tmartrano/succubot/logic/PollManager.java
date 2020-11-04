@@ -22,6 +22,10 @@ public class PollManager {
 
     private static final Random random = new Random();
 
+    //TODO implement ADD movie and DELETE movie
+    //TODO implement GET movies for user
+    //TODO implement GET movies for all users
+
     @Autowired
     public PollManager(final MovieListManager movieListManager,
                        final PollRepository pollRepository,
@@ -94,7 +98,7 @@ public class PollManager {
 
     private void exceedVoteLimitCheck(final List<UserVotes> userVotesList) throws PollValidationException {
         if (userVotesList != null) {
-            if (userVotesList.size() >= 3) //Maybe move the 3 to a properties file to be configurable?? Idk
+            if (userVotesList.size() >= 3) //TODO put this in a configurable properties file
                 throw new PollValidationException("User has exceeded max vote count");
         }
     }
@@ -113,6 +117,14 @@ public class PollManager {
                 .pollEntryDescription(movieEntry.getMovieTitle())
                 .pollEntryNumber(pollEntryNumber)
                 .voteTally(0)
+                .build();
+    }
+
+    private MovieEntry generateMovieEntry(String username, MovieCategory category) {
+        return MovieEntry.builder()
+                .movieTitle("MovieName: " + UUID.randomUUID().toString())
+                .username(username)
+                .category(category)
                 .build();
     }
     //endregion

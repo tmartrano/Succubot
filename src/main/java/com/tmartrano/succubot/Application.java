@@ -1,16 +1,25 @@
 package com.tmartrano.succubot;
 
-import com.tmartrano.succubot.dataaccess.MovieRepository;
-import com.tmartrano.succubot.dataaccess.PollRepository;
-import com.tmartrano.succubot.dataaccess.UserVotesRepository;
+import org.javacord.api.DiscordApi;
+import org.javacord.api.DiscordApiBuilder;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+
 
 @SpringBootApplication
 public class Application {
 
+    @Value("${discord.api.token}")
+    private static String token;
+
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
+
+        DiscordApi api = new DiscordApiBuilder()
+                .setToken(token)
+                .login()
+                .join();
     }
 }

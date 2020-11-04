@@ -232,8 +232,6 @@ public class PollManagerTests {
         //Validate user votes are cleared out
         List<UserVotes> userVotes = testHelper.getAllUserVotes();
         assertTrue(pollEntries.isEmpty());
-
-
     }
 
     //endregion
