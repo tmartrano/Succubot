@@ -1,6 +1,9 @@
 package com.tmartrano.succubot.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,12 +25,21 @@ public enum MovieCategory {
         return name;
     }
 
-    public MovieCategory forValue(String value) {
-        return movieCategoryMap.get(value);
+    public static MovieCategory forValue(final String search) {
+        for (Map.Entry<String, MovieCategory> enumEntry : movieCategoryMap.entrySet()) {
+            if (enumEntry.getKey().equalsIgnoreCase(search))
+                return enumEntry.getValue();
+        }
+        return null;
     }
 
     @Override
     public String toString() {
         return name;
+    }
+
+    public static List<String> getKeys() {
+        Set<String> keySet = movieCategoryMap.keySet();
+        return new ArrayList<>(keySet);
     }
 }

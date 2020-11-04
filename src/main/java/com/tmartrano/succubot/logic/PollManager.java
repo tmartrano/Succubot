@@ -22,9 +22,9 @@ public class PollManager {
 
     private static final Random random = new Random();
 
-    //TODO implement ADD movie and DELETE movie
     //TODO implement GET movies for user
     //TODO implement GET movies for all users
+    //TODO delete winning movie from movie list
 
     @Autowired
     public PollManager(final MovieListManager movieListManager,
@@ -35,8 +35,12 @@ public class PollManager {
         this.userVotesRepository = userVotesRepository;
     }
 
-    public List<PollEntry> generateMoviePoll(final MovieCategory movieCategory) {
+    public List<PollEntry> generateMoviePoll(final MovieCategory movieCategory) throws PollValidationException {
         final List<String> usernames = movieListManager.getDistinctUsernames();
+        if (usernames == null || usernames.isEmpty()) {
+            throw new PollValidationException("There doesn't seem to be any movies yet! Cannot create poll.");
+        }
+
         int pollEntryNumber = 0;
 
         for (final String username : usernames) {
@@ -75,9 +79,16 @@ public class PollManager {
         final PollEntry winningPoll = pollRepository.findTopByOrderByVoteTallyDesc();
 
         pollRepository.deleteAll();
-        pollRepository.deleteAll();
+        userVotesRepository.deleteAll();
 
         return winningPoll;
+    }
+
+    public boolean isActivePoll() {
+        List<PollEntry> pollEntries = pollRepository.findAll();
+        List<UserVotes> userVotes = userVotesRepository.findAll();
+
+        return pollEntries.isEmpty() && userVotes.isEmpty();
     }
 
     //region Helper Methods

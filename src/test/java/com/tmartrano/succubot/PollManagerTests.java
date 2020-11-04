@@ -37,7 +37,7 @@ public class PollManagerTests {
     //region generateMoviePoll
     @Test
     @Transactional
-    public void generatePoll_BadMovies_Successful() {
+    public void generatePoll_BadMovies_Successful() throws PollValidationException {
         testHelper.seedMovieRepositoryOneCategory();
         List<PollEntry> pollEntries = pollManager.generateMoviePoll(MovieCategory.BAD_MOVIE);
 
@@ -60,7 +60,7 @@ public class PollManagerTests {
 
     @Test
     @Transactional
-    public void generatePoll_MixOfCategories_ChooseOnlyGood() {
+    public void generatePoll_MixOfCategories_ChooseOnlyGood() throws PollValidationException {
         testHelper.seedMovieRepositoryMultipleCategories();
         final List<PollEntry> pollEntries = pollManager.generateMoviePoll(MovieCategory.GOOD_MOVIE);
 
@@ -205,7 +205,7 @@ public class PollManagerTests {
 
         //Validate user votes are cleared out
         List<UserVotes> userVotes = testHelper.getAllUserVotes();
-        assertTrue(pollEntries.isEmpty());
+        assertTrue(userVotes.isEmpty());
     }
 
     @Test
@@ -231,7 +231,7 @@ public class PollManagerTests {
 
         //Validate user votes are cleared out
         List<UserVotes> userVotes = testHelper.getAllUserVotes();
-        assertTrue(pollEntries.isEmpty());
+        assertTrue(userVotes.isEmpty());
     }
 
     //endregion
