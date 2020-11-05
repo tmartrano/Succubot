@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -19,11 +20,16 @@ public interface MovieRepository extends JpaRepository<MovieEntry, Long> {
 
     List<MovieEntry> findAllByUsernameAndCategory(String username, MovieCategory category);
 
+    @Query("SELECT e FROM MovieEntry e WHERE LOWER(e.movieTitle) = LOWER(?1)")
     MovieEntry findMovieEntryByMovieTitle(String movieTitle);
 
-    MovieEntry findMovieEntryByMovieTitleAndUsername(String movieTitle, String username);
+    @Modifying
+    @Query("DELETE MovieEntry p WHERE LOWER(p.username) = LOWER(?1) AND LOWER(p.movieTitle) = LOWER(?2)")
+    @Transactional
+    int deleteMovieEntryByTitleForUser(String username, String movieTitle);
 
     @Modifying
-    @Query("DELETE MovieEntry p WHERE p.username = ?1 AND p.movieTitle = ?2")
-    void deleteMovieEntryByTitle(String username, String movieTitle);
+    @Query("DELETE MovieEntry p WHERE LOWER(p.movieTitle) = LOWER(?1)")
+    @Transactional
+    void deleteMovieEntryByTitle(String movieTitle);
 }

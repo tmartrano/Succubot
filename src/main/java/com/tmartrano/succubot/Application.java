@@ -1,5 +1,6 @@
 package com.tmartrano.succubot;
 
+import com.tmartrano.succubot.listeners.HelpListener;
 import com.tmartrano.succubot.listeners.MovieManagementListener;
 import com.tmartrano.succubot.listeners.PollListener;
 import org.javacord.api.DiscordApi;
@@ -25,7 +26,10 @@ public class Application {
 
         final PollListener pollListener = context.getBean(PollListener.class);
         final MovieManagementListener movieManagementListener = context.getBean((MovieManagementListener.class));
+        final HelpListener helpListener = context.getBean(HelpListener.class);
+
         api.addMessageCreateListener(pollListener);
         api.addMessageCreateListener(movieManagementListener);
+        api.addMessageCreateListener(helpListener);
     }
 }

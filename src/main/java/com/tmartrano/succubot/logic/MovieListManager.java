@@ -42,12 +42,30 @@ public class MovieListManager {
 
     public void deleteMovieEntryForUser(final String username, final String movieTitle) throws PollValidationException {
         final MovieEntry movieEntry =
-                movieRepository.findMovieEntryByMovieTitleAndUsername(username, movieTitle);
+                movieRepository.findMovieEntryByMovieTitle(movieTitle);
+
+        if (movieEntry == null) {
+            throw new PollValidationException("Cannot delete, movie entry " + movieTitle + "does not exist");
+        }
+
+        if (!movieEntry.getUsername().equalsIgnoreCase(username)) {
+            throw new PollValidationException("You cannot edit the movies for another user!");
+        }
+        int deletedRows = movieRepository.deleteMovieEntryByTitleForUser(username, movieTitle);
+
+        if (deletedRows == 0) {
+            throw new PollValidationException("Something went wrong! No rows were deleted.");
+        }
+    }
+
+    void deleteMovieEntry(final String movieTitle) throws PollValidationException {
+        final MovieEntry movieEntry =
+                movieRepository.findMovieEntryByMovieTitle(movieTitle);
 
         if (movieEntry == null) {
             throw new PollValidationException("Cannot delete, movie entry" + movieTitle + "does not exist");
         }
-        movieRepository.deleteMovieEntryByTitle(username, movieTitle);
+        movieRepository.deleteMovieEntryByTitle(movieTitle);
     }
 
     //region Helper Methods

@@ -4,6 +4,7 @@ import com.tmartrano.succubot.dataaccess.PollRepository;
 import com.tmartrano.succubot.dataaccess.UserVotesRepository;
 import com.tmartrano.succubot.logic.PollManager;
 import com.tmartrano.succubot.model.*;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,11 +36,15 @@ public class PollManagerTests {
 
     private final String username = "Tealx";
 
+    @Before
+    public void cleanup() {
+        testHelper.cleanDatabases();
+    }
+
     //region generateMoviePoll
     @Test
     @Transactional
     public void generatePoll_BadMovies_Successful() throws PollValidationException {
-        testHelper.cleanDatabases();
         testHelper.seedMovieRepositoryOneCategory();
         List<PollEntry> pollEntries = pollManager.generateMoviePoll(MovieCategory.BAD_MOVIE);
 
@@ -63,7 +68,6 @@ public class PollManagerTests {
     @Test
     @Transactional
     public void generatePoll_MixOfCategories_ChooseOnlyGood() throws PollValidationException {
-        testHelper.cleanDatabases();
         testHelper.seedMovieRepositoryMultipleCategories();
         final List<PollEntry> pollEntries = pollManager.generateMoviePoll(MovieCategory.GOOD_MOVIE);
 
@@ -155,7 +159,6 @@ public class PollManagerTests {
     @Test(expected = PollValidationException.class)
     @Transactional
     public void voteForMovie_UserEnteredNumberNotOnList_VoteNotRecorded() throws PollValidationException {
-        testHelper.cleanDatabases();
         testHelper.seedMovieRepositoryOneCategory();
         pollManager.generateMoviePoll(MovieCategory.BAD_MOVIE);
 

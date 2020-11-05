@@ -40,7 +40,7 @@ public class PollListener implements MessageCreateListener {
                 final MovieCategory category = MovieCategory.forValue(splitMessage[1]);
                 final List<PollEntry> pollEntries = pollManager.generateMoviePoll(category);
                 final StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("Here's this weeks poll to vote enter !vote [entryNumber]:\n");
+                stringBuilder.append("<:susanping:774007071884312636> @everyone Here's this weeks poll to vote enter !vote [entryNumber]:\n");
                 for (PollEntry pollEntry : pollEntries) {
                     stringBuilder.append(pollEntry.getPollEntryNumber())
                             .append(": ")
@@ -48,7 +48,6 @@ public class PollListener implements MessageCreateListener {
                             .append("\n");
                 }
                 message.getChannel().sendMessage(stringBuilder.toString());
-                //TODO figure out how to ping users
             }
             //Vote for an entry
             if (command.equalsIgnoreCase("!vote")) {
@@ -57,7 +56,17 @@ public class PollListener implements MessageCreateListener {
                 final int movieVoteEntry = Integer.parseInt(splitMessage[1]);
 
                 pollManager.voteForMovie(username, movieVoteEntry);
-                message.getChannel().sendMessage("Vote successfully recorded.");
+                message.deleteMessage();
+                message.getChannel().sendMessage(username+" has cast a vote.");
+            }
+            //Close the poll and return the winner
+            if (command.equalsIgnoreCase("!closePoll")) {
+                if (pollManager.isInactivePoll()) {
+                    throw new PollValidationException("Cannot return winner, there's no active poll!");
+                }
+
+                final PollEntry winningEntry = pollManager.closePoll();
+                message.getChannel().sendMessage("The winning movie is: " + winningEntry.getPollEntryDescription() + " <:mrtartar:666753603641278465>");
             }
         } catch (PollValidationException ex) {
             message.getChannel().sendMessage(ex.getMessage());

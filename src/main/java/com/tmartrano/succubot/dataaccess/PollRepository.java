@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -16,7 +17,8 @@ public interface PollRepository extends JpaRepository<PollEntry, Long> {
 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE PollEntry p SET p.voteTally = ?2 WHERE p.entryId = ?1")
-    void setVoteTally(UUID entryId, int voteTally);
+    @Transactional
+    int setVoteTally(UUID entryId, int voteTally);
 
     @Modifying
     @Query("DELETE FROM PollEntry")

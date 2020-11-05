@@ -69,16 +69,21 @@ public class PollManager {
         validateVotingEligibility(username, movieVotedFor);
 
         int updatedVoteTally = movieVotedFor.getVoteTally() + 1;
-        pollRepository.setVoteTally(movieVotedFor.getEntryId(), updatedVoteTally);
+        int updatedRows = pollRepository.setVoteTally(movieVotedFor.getEntryId(), updatedVoteTally);
+        if (updatedRows == 0) {
+            throw new PollValidationException("Something went wrong, no vote was recorded.");
+        }
 
         userVotesRepository.save(generateUserVote(username, movieVotedFor));
     }
 
-    public PollEntry closePoll() {
+    public PollEntry closePoll() throws PollValidationException {
         final PollEntry winningPoll = pollRepository.findTopByOrderByVoteTallyDesc();
 
         pollRepository.deleteAll();
         userVotesRepository.deleteAll();
+
+        movieListManager.deleteMovieEntry(winningPoll.getPollEntryDescription());
 
         return winningPoll;
     }

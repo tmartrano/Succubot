@@ -1,7 +1,9 @@
 package com.tmartrano.succubot.validation;
 
+import com.tmartrano.succubot.dataaccess.MovieRepository;
 import com.tmartrano.succubot.logic.PollManager;
 import com.tmartrano.succubot.model.MovieCategory;
+import com.tmartrano.succubot.model.MovieEntry;
 import com.tmartrano.succubot.model.PollValidationException;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +15,12 @@ import java.util.List;
 public class ListenerMessageValidation {
 
     private PollManager pollManager;
+    private MovieRepository movieRepository;
 
     @Autowired
-    public ListenerMessageValidation(final PollManager pollManager) {
+    public ListenerMessageValidation(final PollManager pollManager, final MovieRepository movieRepository) {
         this.pollManager = pollManager;
+        this.movieRepository = movieRepository;
     }
 
     public void validateVoteRequest(final String[] splitMessage) throws PollValidationException {
@@ -31,6 +35,14 @@ public class ListenerMessageValidation {
         } catch (NumberFormatException ex) {
             throw new PollValidationException("Invalid entry, please supply a number");
         }
+    }
+
+    public void validateDeleteMovieRequest(final String username, final String[] splitMessage) throws PollValidationException {
+        if (splitMessage.length < 2) {
+            throw new PollValidationException("Please supply a title of your movie to delete");
+        }
+
+        final String movieTitle = splitMessage[1];
     }
 
     public void validateAddMovieRequest(final String[] splitMessage) throws PollValidationException {
