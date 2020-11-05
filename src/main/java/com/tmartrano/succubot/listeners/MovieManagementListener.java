@@ -57,9 +57,10 @@ public class MovieManagementListener implements MessageCreateListener {
                             ":\n" +
                             buildMovieListStingByCategory(movieEntriesForUser);
                     message.getChannel().sendMessage(stringBuilder);
+                } else {
+                    message.getChannel().sendMessage("No movies yet! Start adding them with !add [category] [title]");
                 }
 
-                message.getChannel().sendMessage("No movies yet < Start adding them with !add [category] [title]");
             }
             //Get all movies from all users
             if (command.equalsIgnoreCase("!allMovies")) {
@@ -79,8 +80,9 @@ public class MovieManagementListener implements MessageCreateListener {
                                 .append(buildMovieListStingByCategory(moviesByUser));
                     }
                     message.getChannel().sendMessage(stringBuilder.toString());
+                } else {
+                    message.getChannel().sendMessage("No movies yet! Start adding them with !add [category] [title]");
                 }
-                message.getChannel().sendMessage("No movies yet! Start adding them with !add [category] [title]");
             }
             //Delete a movie for a user
             if (command.equalsIgnoreCase("!delete")) {
@@ -109,11 +111,13 @@ public class MovieManagementListener implements MessageCreateListener {
                     .collect(Collectors.toList());
 
             if (!moviesByCategory.isEmpty()) {
-                stringBuilder.append(category)
+                stringBuilder.append("__")
+                        .append(category)
+                        .append("__")
                         .append("\n");
 
                 for (final MovieEntry movieEntry : moviesByCategory) {
-                    stringBuilder.append("- ")
+                    stringBuilder.append("<:mrtartar:666753603641278465> ")
                             .append(movieEntry.getMovieTitle())
                             .append("\n");
                 }
