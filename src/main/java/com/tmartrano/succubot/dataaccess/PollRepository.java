@@ -22,8 +22,5 @@ public interface PollRepository extends JpaRepository<PollEntry, Long> {
     @Query("DELETE FROM PollEntry")
     void deleteAll();
 
-    /*@Query("SELECT PollEntry MAX (p.voteTally) FROM PollEntry p")
-    PollEntry getWinningMovie();*/
-
     PollEntry findTopByOrderByVoteTallyDesc();
 }

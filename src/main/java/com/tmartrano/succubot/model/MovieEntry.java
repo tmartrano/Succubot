@@ -3,6 +3,7 @@ package com.tmartrano.succubot.model;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Tolerate;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
@@ -17,6 +18,11 @@ import java.time.LocalDateTime;
 public class MovieEntry implements Serializable {
 
     private static final long serialVersionUID = -8402611044513083864L;
+
+    @Tolerate
+    public MovieEntry() {
+
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

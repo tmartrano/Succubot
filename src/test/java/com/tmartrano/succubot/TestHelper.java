@@ -133,4 +133,10 @@ class TestHelper {
         pollManager.voteForMovie("User2", 3);
         pollManager.voteForMovie("User3", 3);
     }
+
+    void cleanDatabases() {
+        pollRepository.deleteAll();
+        userVotesRepository.deleteAll();
+        movieRepository.deleteAll();
+    }
 }

@@ -23,7 +23,7 @@ public class MovieListManager {
         return movieRepository.findAllByUsernameAndCategory(username, movieCategory);
     }
 
-    List<String> getDistinctUsernames() {
+    public List<String> getDistinctUsernames() {
         return movieRepository.findDistinctUsername();
     }
 

@@ -4,6 +4,7 @@ import com.tmartrano.succubot.logic.PollManager;
 import com.tmartrano.succubot.model.MovieCategory;
 import com.tmartrano.succubot.model.PollEntry;
 import com.tmartrano.succubot.model.PollValidationException;
+import com.tmartrano.succubot.validation.ListenerMessageValidation;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,73 +17,50 @@ public class PollListener implements MessageCreateListener {
 
     private PollManager pollManager;
 
+    private ListenerMessageValidation listenerMessageValidation;
+
     @Autowired
-    public PollListener(final PollManager pollManager) {
+    public PollListener(final ListenerMessageValidation listenerMessageValidation,
+                        final PollManager pollManager) {
+        this.listenerMessageValidation = listenerMessageValidation;
         this.pollManager = pollManager;
     }
 
     @Override
     public void onMessageCreate(MessageCreateEvent message) {
         String[] splitMessage = message.getMessageContent().split("\\s+");
-
-        /*Creates a poll*/
-        if (validatePollGenerationRequest(message, splitMessage)) {
-            final MovieCategory category = MovieCategory.forValue(splitMessage[1]);
-            try {
-                final List<PollEntry> pollEntries = pollManager.generateMoviePoll(category);
-            } catch (PollValidationException ex) {
-                message.getChannel().sendMessage(ex.getMessage());
-            }
-        }
-    }
-
-    //region Helper Methods
-    private boolean validatePollGenerationRequest(final MessageCreateEvent message, final String[] splitMessage) {
-        if (splitMessage == null) {
-            message.getChannel().sendMessage("How the fuck did you even get this to break like this");
-            return false;
-        }
-
         final String command = splitMessage[0];
 
-        if (!command.equalsIgnoreCase("!poll")) {
-            return false;
-        }
+        try {
+            /*Creates a poll*/
+            if (command.equalsIgnoreCase("!poll")) {
 
-        if (splitMessage.length < 2) {
-            String stringBuilder = "Please supply a category to generate a poll.\n" +
-                    getListOfCategories();
-            message.getChannel().sendMessage(stringBuilder);
-            return false;
-        }
+                listenerMessageValidation.validatePollGenerationRequest(splitMessage);
 
-        final String category = splitMessage[1];
+                final MovieCategory category = MovieCategory.forValue(splitMessage[1]);
+                final List<PollEntry> pollEntries = pollManager.generateMoviePoll(category);
+                final StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("Here's this weeks poll to vote enter !vote [entryNumber]:\n");
+                for (PollEntry pollEntry : pollEntries) {
+                    stringBuilder.append(pollEntry.getPollEntryNumber())
+                            .append(": ")
+                            .append(pollEntry.getPollEntryDescription())
+                            .append("\n");
+                }
+                message.getChannel().sendMessage(stringBuilder.toString());
+                //TODO figure out how to ping users
+            }
+            //Vote for an entry
+            if (command.equalsIgnoreCase("!vote")) {
+                listenerMessageValidation.validateVoteRequest(splitMessage);
+                final String username = message.getMessageAuthor().getName();
+                final int movieVoteEntry = Integer.parseInt(splitMessage[1]);
 
-        if (!pollManager.isActivePoll()) {
-            message.getChannel().sendMessage("A poll is already active! Unable to generate poll.");
-            return false;
+                pollManager.voteForMovie(username, movieVoteEntry);
+                message.getChannel().sendMessage("Vote successfully recorded.");
+            }
+        } catch (PollValidationException ex) {
+            message.getChannel().sendMessage(ex.getMessage());
         }
-
-        final MovieCategory movieCategory = MovieCategory.forValue(category);
-        if (movieCategory == null) {
-            String stringBuilder = "Invalid category\n" +
-                    getListOfCategories();
-            message.getChannel().sendMessage(stringBuilder);
-            return false;
-        }
-        return true;
     }
-
-    private String getListOfCategories() {
-        final List<String> movieKeys = MovieCategory.getKeys();
-        final StringBuilder stringBuilder = new StringBuilder();
-
-        stringBuilder.append("Here's a list of valid categories:\n");
-
-        for (final String key : movieKeys) {
-            stringBuilder.append("- ").append(key).append("\n");
-        }
-        return stringBuilder.toString();
-    }
-    //endRegion
 }

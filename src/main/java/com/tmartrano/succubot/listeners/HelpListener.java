@@ -10,6 +10,4 @@ public class HelpListener {
     //!delete [title] - Deletes a movie based on it's title, ignores case, checks user deleting the title to make sure it matches
     //!myList - Shows all movies for a given user
     //!allMovies - Shows all movies from all users
-    //!allMoviesByCat - Shows all movies from all users for a given category
-    //!categories - Shows all eligable categories
 }

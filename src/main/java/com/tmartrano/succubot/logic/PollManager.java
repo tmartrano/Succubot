@@ -1,6 +1,5 @@
 package com.tmartrano.succubot.logic;
 
-import com.tmartrano.succubot.dataaccess.MovieRepository;
 import com.tmartrano.succubot.dataaccess.PollRepository;
 import com.tmartrano.succubot.dataaccess.UserVotesRepository;
 import com.tmartrano.succubot.model.*;
@@ -84,7 +83,7 @@ public class PollManager {
         return winningPoll;
     }
 
-    public boolean isActivePoll() {
+    public boolean isInactivePoll() {
         List<PollEntry> pollEntries = pollRepository.findAll();
         List<UserVotes> userVotes = userVotesRepository.findAll();
 
